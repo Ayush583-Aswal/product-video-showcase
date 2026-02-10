@@ -27,7 +27,7 @@ const VideoFeed = () => {
       className="h-screen w-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
     >
       {videos.map((video, index) => (
-        <VideoCard key={video.id} video={video} isActive={index === activeIndex} />
+        <VideoCard key={video.id} video={video} isActive={index === activeIndex} isFirst={index === 0} />
       ))}
     </div>
   );

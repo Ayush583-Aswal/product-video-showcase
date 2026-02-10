@@ -61,4 +61,16 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* Scroll hint bounce animation */
+  @keyframes scroll-hint {
+    0%, 100% { opacity: 0; transform: translate(-50%, 0); }
+    20% { opacity: 1; transform: translate(-50%, 0); }
+    50% { opacity: 1; transform: translate(-50%, 8px); }
+    70% { opacity: 1; transform: translate(-50%, 0); }
+    90% { opacity: 0.5; transform: translate(-50%, 4px); }
+  }
+  .animate-scroll-hint {
+    animation: scroll-hint 1.5s ease-in-out infinite;
+  }
 }
