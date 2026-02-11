@@ -98,66 +98,69 @@ const VideoCard = ({ video, isActive, isFirst }) => {
         )}
       </div>
 
-      {/* Bottom info bar — expandable */}
+      {/* Bottom info bar — compact & expandable */}
       <div className="bg-card border-t border-border transition-all duration-300 ease-out">
-        {/* Expand handle */}
+        {/* Expand handle with arrow */}
         <button
           onClick={() => setExpanded((e) => !e)}
-          className="w-full flex items-center justify-center py-1.5"
+          className="w-full flex items-center justify-center py-1"
         >
-          <div className="w-8 h-1 rounded-full bg-muted-foreground/40" />
+          <svg
+            className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+            fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
         </button>
 
-        <div className="px-4 pb-3 flex flex-col gap-2">
+        <div className="px-3 pb-2 flex flex-col gap-1.5">
           {/* Seller row */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-foreground text-[10px] font-bold border border-border flex-shrink-0">
+            <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-foreground text-[9px] font-bold border border-border flex-shrink-0">
               {video.sellerLogo?.charAt(0) || "S"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-foreground text-sm font-semibold truncate">{video.sellerName}</p>
-              <p className="text-muted-foreground text-[10px]">{video.postedAgo}</p>
+              <p className="text-foreground text-xs font-semibold truncate">{video.sellerName}</p>
+              <p className="text-muted-foreground text-[9px]">{video.postedAgo}</p>
             </div>
             <SourceBadge source={video.source} />
-            <button onClick={toggleMute} className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
+            <button onClick={toggleMute} className="w-7 h-7 bg-secondary rounded-full flex items-center justify-center flex-shrink-0">
               {muted ? (
-                <svg className="w-4 h-4 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                 </svg>
               )}
             </button>
+            <button className="bg-accent text-accent-foreground text-[10px] font-semibold px-3 py-1.5 rounded-full active:scale-[0.97] transition-transform flex-shrink-0">
+              Contact
+            </button>
           </div>
 
           {/* Title — expands on toggle */}
-          <p className={`text-foreground/80 text-xs leading-relaxed transition-all duration-300 ${expanded ? "" : "line-clamp-1"}`}>
+          <p className={`text-foreground/80 text-[11px] leading-relaxed transition-all duration-300 ${expanded ? "" : "line-clamp-1"}`}>
             {video.title}
           </p>
 
           {/* Expanded details */}
           {expanded && (
-            <div className="flex flex-col gap-2 animate-fade-in">
+            <div className="flex flex-col gap-1.5 animate-fade-in">
               {video.description && (
-                <p className="text-muted-foreground text-[11px] leading-relaxed">
+                <p className="text-muted-foreground text-[10px] leading-relaxed">
                   {video.description}
                 </p>
               )}
               <div className="flex items-center gap-3">
-                <span className="text-muted-foreground text-[10px]">Source: {video.source}</span>
-                <span className="text-muted-foreground text-[10px]">•</span>
-                <span className="text-muted-foreground text-[10px]">{video.postedAgo}</span>
+                <span className="text-muted-foreground text-[9px]">Source: {video.source}</span>
+                <span className="text-muted-foreground text-[9px]">•</span>
+                <span className="text-muted-foreground text-[9px]">{video.postedAgo}</span>
               </div>
             </div>
           )}
-
-          {/* Contact button */}
-          <button className="w-full bg-accent text-accent-foreground text-sm font-semibold py-2.5 rounded-lg active:scale-[0.98] transition-transform">
-            Contact Supplier
-          </button>
         </div>
       </div>
     </div>
