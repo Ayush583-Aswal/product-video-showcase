@@ -17,7 +17,13 @@ const VideoFeed = () => {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    
+    // Set initial scroll position to top
+    el.scrollTop = 0;
+    
     el.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Call once to set initial active index
+    
     return () => el.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 

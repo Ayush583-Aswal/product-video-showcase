@@ -48,9 +48,24 @@
     @apply border-border;
   }
 
+  html {
+    height: 100%;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
   body {
     @apply bg-background text-foreground;
+    height: 100%;
+    overflow: hidden;
     -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
+
+  #root {
+    height: 100%;
+    overflow: hidden;
   }
 
   /* Hide scrollbar for video feed */
@@ -72,5 +87,14 @@
   }
   .animate-scroll-hint {
     animation: scroll-hint 1.5s ease-in-out infinite;
+  }
+
+  /* Fade in animation */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-in;
   }
 }
