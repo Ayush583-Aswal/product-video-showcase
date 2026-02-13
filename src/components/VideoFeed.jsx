@@ -8,6 +8,7 @@ const VideoFeed = () => {
   const containerRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [resolvedVideos, setResolvedVideos] = useState(videos);
+  const [isMuted, setIsMuted] = useState(true);
 
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
@@ -75,7 +76,14 @@ const VideoFeed = () => {
       className="h-screen w-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
     >
       {resolvedVideos.map((video, index) => (
-        <VideoCard key={video.id} video={video} isActive={index === activeIndex} isFirst={index === 0} />
+        <VideoCard
+          key={video.id}
+          video={video}
+          isActive={index === activeIndex}
+          isFirst={index === 0}
+          isMuted={isMuted}
+          onToggleMuted={() => setIsMuted((value) => !value)}
+        />
       ))}
     </div>
   );
