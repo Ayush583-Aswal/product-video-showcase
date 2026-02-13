@@ -85,7 +85,8 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
   const provider = normalizeProvider(video.source, video.url);
   const embedUrl = getEmbedUrl(provider, video.url, isMuted);
   const isNativeVideo = provider === "file" || !embedUrl;
-  const shortDescription = video.description?.trim() || "Tap the arrow for more details.";
+  const description = video.description?.trim() || "";
+  const postedAgo = video.postedAgo || "recently";
   const relatedProducts = Array.isArray(video.relatedProducts) ? video.relatedProducts : [];
 
   useEffect(() => {
@@ -189,14 +190,16 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
           </svg>
         </button>
 
-        <div className="px-3 pb-3">
-          <div className="flex items-start gap-2">
-            <div className="flex-1 min-w-0">
-              <p className="text-foreground text-[11px] font-semibold leading-snug line-clamp-2">{video.title}</p>
-              <p className={`text-foreground/70 text-[10px] leading-snug mt-1 transition-all duration-200 ${expanded ? "" : "line-clamp-2"}`}>
-                {shortDescription}
-              </p>
+        <div className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-foreground text-[11px] font-semibold leading-snug truncate">{video.title}</p>
+              <p className="text-foreground/70 text-[9px] leading-none mt-1">Posted {postedAgo}</p>
             </div>
+
+            <button className="h-7 px-2.5 bg-accent text-accent-foreground text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform">
+              Contact Supplier
+            </button>
 
             <button
               onClick={(event) => {
@@ -221,18 +224,11 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
           </div>
 
           {expanded && (
-            <div className="mt-3 animate-fade-in">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-muted-foreground/70 text-[9px] uppercase tracking-wide">Posted</span>
-                <span className="text-foreground/80 text-[10px]">{video.postedAgo}</span>
-              </div>
-
-              <button className="w-full bg-accent text-accent-foreground text-[10px] font-semibold px-3 py-2 rounded-md active:scale-[0.99] transition-transform">
-                Contact Supplier
-              </button>
+            <div className="mt-2.5 animate-fade-in">
+              {description && <p className="text-foreground/75 text-[10px] leading-snug">{description}</p>}
 
               {relatedProducts.length > 0 && (
-                <div className="mt-3">
+                <div className={`${description ? "mt-2.5" : ""}`}>
                   <p className="text-muted-foreground/80 text-[9px] uppercase tracking-wide mb-2">Related Products</p>
                   <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
                     {relatedProducts.map((product, index) => (
