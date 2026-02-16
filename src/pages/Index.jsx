@@ -1,9 +1,9 @@
-import VideoFeed from "../components/VideoFeed";
+import VideoBentoGrid from "../components/VideoBentoGrid";
 
 const Index = () => {
   return (
     <div className="w-full h-screen bg-background overflow-hidden">
-      <VideoFeed />
+      <VideoBentoGrid />
     </div>
   );
 };

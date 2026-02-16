@@ -24,6 +24,11 @@ export const extractYouTubeVideoId = (url) => {
   return null;
 };
 
+export const getYouTubeThumbnailUrl = (url) => {
+  const videoId = extractYouTubeVideoId(url);
+  return videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : null;
+};
+
 const fetchYouTubeDataApiMetadata = async (videoId, apiKey) => {
   const endpoint = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${encodeURIComponent(videoId)}&key=${encodeURIComponent(apiKey)}`;
   const response = await fetch(endpoint);
@@ -32,11 +37,16 @@ const fetchYouTubeDataApiMetadata = async (videoId, apiKey) => {
   const payload = await response.json();
   const snippet = payload?.items?.[0]?.snippet;
   if (!snippet?.title) return null;
+  const thumbnails = snippet?.thumbnails || {};
+  const bestThumbnail = thumbnails?.maxres || thumbnails?.standard || thumbnails?.high || thumbnails?.medium || thumbnails?.default;
 
   return {
     title: snippet.title,
     description: snippet.description || "",
     publishedAt: snippet.publishedAt || null,
+    thumbnailUrl: bestThumbnail?.url || null,
+    thumbnailWidth: bestThumbnail?.width || null,
+    thumbnailHeight: bestThumbnail?.height || null,
   };
 };
 
@@ -52,6 +62,9 @@ const fetchYouTubeOEmbedMetadata = async (url) => {
     title: payload.title,
     description: "",
     publishedAt: null,
+    thumbnailUrl: payload.thumbnail_url || null,
+    thumbnailWidth: payload.thumbnail_width || null,
+    thumbnailHeight: payload.thumbnail_height || null,
   };
 };
 

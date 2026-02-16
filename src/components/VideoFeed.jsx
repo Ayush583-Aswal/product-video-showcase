@@ -1,13 +1,12 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { formatDistanceToNow } from "date-fns";
 import VideoCard from "./VideoCard";
-import videos from "../data/videos";
-import { fetchYouTubeMetadata, isYouTubeUrl } from "../lib/youtube";
+import useResolvedVideos from "../hooks/useResolvedVideos";
 
-const VideoFeed = () => {
+const VideoFeed = ({ initialVideoId }) => {
   const containerRef = useRef(null);
+  const didSetInitialPositionRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [resolvedVideos, setResolvedVideos] = useState(videos);
+  const resolvedVideos = useResolvedVideos();
   const [isMuted, setIsMuted] = useState(true);
 
   const handleScroll = useCallback(() => {
@@ -21,54 +20,30 @@ const VideoFeed = () => {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    
-    // Set initial scroll position to top
-    el.scrollTop = 0;
-    
+
     el.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Call once to set initial active index
-    
+    handleScroll();
+
     return () => el.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
   useEffect(() => {
-    let cancelled = false;
+    if (didSetInitialPositionRef.current) return;
+    if (!containerRef.current || resolvedVideos.length === 0) return;
 
-    const hydrateYouTubeMetadata = async () => {
-      const hydrated = await Promise.all(
-        videos.map(async (video) => {
-          const shouldHydrate = video.source === "youtube" || isYouTubeUrl(video.url);
-          if (!shouldHydrate) return video;
+    const targetId = initialVideoId ? String(initialVideoId) : null;
+    const initialIndex = targetId
+      ? Math.max(
+          0,
+          resolvedVideos.findIndex((video) => String(video.id) === targetId),
+        )
+      : 0;
 
-          const metadata = await fetchYouTubeMetadata(video.url);
-          if (!metadata) return video;
-
-          const title = metadata.title || video.title;
-          const description = metadata.description || video.description;
-          const postedAgo = metadata.publishedAt
-            ? formatDistanceToNow(new Date(metadata.publishedAt), { addSuffix: true })
-            : video.postedAgo;
-
-          return {
-            ...video,
-            title,
-            description,
-            postedAgo,
-          };
-        }),
-      );
-
-      if (!cancelled) {
-        setResolvedVideos(hydrated);
-      }
-    };
-
-    hydrateYouTubeMetadata();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    const height = containerRef.current.clientHeight || window.innerHeight;
+    containerRef.current.scrollTop = initialIndex * height;
+    setActiveIndex(initialIndex);
+    didSetInitialPositionRef.current = true;
+  }, [initialVideoId, resolvedVideos]);
 
   return (
     <div
