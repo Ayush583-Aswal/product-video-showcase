@@ -5,7 +5,7 @@ const Feed = () => {
   const { videoId } = useParams();
 
   return (
-    <div className="w-full h-screen bg-background overflow-hidden">
+    <div className="w-full h-dvh bg-background overflow-hidden">
       <VideoFeed initialVideoId={videoId} />
     </div>
   );

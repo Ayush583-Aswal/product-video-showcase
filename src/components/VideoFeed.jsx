@@ -48,7 +48,7 @@ const VideoFeed = ({ initialVideoId }) => {
   return (
     <div
       ref={containerRef}
-      className="h-screen w-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
+      className="h-dvh w-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
     >
       {resolvedVideos.map((video, index) => (
         <VideoCard

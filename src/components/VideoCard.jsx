@@ -118,7 +118,7 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
   }, [isFirst, isActive]);
 
   return (
-    <div className="w-full h-screen snap-start snap-always flex-shrink-0 bg-background flex flex-col">
+    <div className="w-full h-dvh snap-start snap-always flex-shrink-0 bg-background flex flex-col">
       <div className="relative flex-1 min-h-0 bg-black">
         {isNativeVideo ? (
           <video
@@ -189,8 +189,13 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
               <p className="text-foreground/70 text-[9px] leading-none mt-1">Posted {postedAgo}</p>
             </div>
 
-            <button className="h-7 px-2.5 bg-accent text-accent-foreground text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform">
-              Contact Supplier
+            <button className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+              <span className="flex items-center gap-1.5">
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M21.44 2.56a1.5 1.5 0 00-1.54-.36l-16 5a1.5 1.5 0 00-.1 2.84l6.07 2.23 2.23 6.07a1.5 1.5 0 001.4.98h.06a1.5 1.5 0 001.38-1.09l5-16a1.5 1.5 0 00-.5-1.67zM11.6 11.34l-4.22-1.55 10.13-3.17-5.91 4.72zM13.2 16.6l-1.55-4.22 4.72-5.9-3.17 10.12z" />
+                </svg>
+                <span>Contact Supplier</span>
+              </span>
             </button>
 
             <button
