@@ -89,6 +89,28 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
   const description = video.description?.trim() || "";
   const postedAgo = video.postedAgo || "recently";
   const relatedProducts = Array.isArray(video.relatedProducts) ? video.relatedProducts : [];
+  const muteButton = (
+    <button
+      onClick={(event) => {
+        event.stopPropagation();
+        onToggleMuted();
+      }}
+      className="w-7 h-7 bg-secondary/80 rounded-full flex items-center justify-center flex-shrink-0"
+      aria-label={isMuted ? "Unmute videos" : "Mute videos"}
+      title={isMuted ? "Unmute" : "Mute"}
+    >
+      {isMuted ? (
+        <svg className="w-3.5 h-3.5 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+        </svg>
+      ) : (
+        <svg className="w-3.5 h-3.5 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+      )}
+    </button>
+  );
 
   useEffect(() => {
     if (!isNativeVideo || !videoRef.current) return;
@@ -191,40 +213,16 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
               <p className="text-foreground/70 text-[9px] mt-1 leading-none">
                 Posted {postedAgo}
               </p>
-
-              {expanded && (
-                <button className="mt-2 h-7 px-2.5 mx-auto flex items-center justify-center bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-                  Contact Supplier
-                </button>
-              )}
             </div>
 
             {!expanded && (
-              <button className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-                Contact Supplier
-              </button>
+              <div className="flex items-center gap-2">
+                <button className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                  Contact Supplier
+                </button>
+                {muteButton}
+              </div>
             )}
-
-            <button
-              onClick={(event) => {
-                event.stopPropagation();
-                onToggleMuted();
-              }}
-              className="w-7 h-7 bg-secondary/80 rounded-full flex items-center justify-center flex-shrink-0"
-              aria-label={isMuted ? "Unmute videos" : "Mute videos"}
-              title={isMuted ? "Unmute" : "Mute"}
-            >
-              {isMuted ? (
-                <svg className="w-3.5 h-3.5 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 h-3.5 text-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                </svg>
-              )}
-            </button>
           </div>
 
           {expanded && (
@@ -257,6 +255,13 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
                   </div>
                 </div>
               )}
+
+              <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between">
+                {muteButton}
+                <button className="h-7 px-3 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                  Contact Supplier
+                </button>
+              </div>
             </div>
           )}
         </div>
