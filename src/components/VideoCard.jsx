@@ -183,20 +183,27 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
         </button>
 
         <div className="px-3 py-2">
-          <div className="flex items-center gap-2">
+          <div className={`flex gap-2 ${expanded ? "items-start" : "items-center"}`}>
             <div className="min-w-0 flex-1">
-              <p className="text-foreground text-[11px] font-semibold leading-snug truncate">{video.title}</p>
-              <p className="text-foreground/70 text-[9px] leading-none mt-1">Posted {postedAgo}</p>
+              <p className={`text-foreground text-[11px] font-semibold leading-snug ${expanded ? "line-clamp-3" : "truncate"}`}>
+                {video.title}
+              </p>
+              <p className="text-foreground/70 text-[9px] mt-1 leading-none">
+                Posted {postedAgo}
+              </p>
+
+              {expanded && (
+                <button className="mt-2 h-7 px-2.5 mx-auto flex items-center justify-center bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                  Contact Supplier
+                </button>
+              )}
             </div>
 
-            <button className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-              <span className="flex items-center gap-1.5">
-                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M21.44 2.56a1.5 1.5 0 00-1.54-.36l-16 5a1.5 1.5 0 00-.1 2.84l6.07 2.23 2.23 6.07a1.5 1.5 0 001.4.98h.06a1.5 1.5 0 001.38-1.09l5-16a1.5 1.5 0 00-.5-1.67zM11.6 11.34l-4.22-1.55 10.13-3.17-5.91 4.72zM13.2 16.6l-1.55-4.22 4.72-5.9-3.17 10.12z" />
-                </svg>
-                <span>Contact Supplier</span>
-              </span>
-            </button>
+            {!expanded && (
+              <button className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                Contact Supplier
+              </button>
+            )}
 
             <button
               onClick={(event) => {
@@ -221,7 +228,7 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
           </div>
 
           {expanded && (
-            <div className="mt-2.5 animate-fade-in">
+            <div className="mt-2.5 animate-fade-in rounded-md border border-border/60 bg-secondary/20 p-2.5">
               {description && <p className="text-foreground/75 text-[10px] leading-snug">{description}</p>}
 
               {relatedProducts.length > 0 && (
