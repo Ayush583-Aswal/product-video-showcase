@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { trackEvent } from "../lib/analytics";
 
 const normalizeProvider = (source, url) => {
   if (source === "youtube" || source === "instagram" || source === "facebook") {
@@ -78,7 +79,7 @@ const getEmbedUrl = (provider, url, isMuted) => {
   return null;
 };
 
-const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
+const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted, sellerId }) => {
   const videoRef = useRef(null);
   const [paused, setPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -89,12 +90,38 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
   const description = video.description?.trim() || "";
   const postedAgo = video.postedAgo || "recently";
   const relatedProducts = Array.isArray(video.relatedProducts) ? video.relatedProducts : [];
+  const videoId = String(video.id);
+
+  const handleMuteToggle = (event) => {
+    event.stopPropagation();
+    onToggleMuted();
+    trackEvent("mute_toggle", {
+      seller_id: sellerId,
+      video_id: videoId,
+      mute_state: isMuted ? "unmuted" : "muted",
+    });
+  };
+
+  const handleContactSupplierClick = () => {
+    trackEvent("contact_supplier_click", {
+      seller_id: sellerId,
+      video_id: videoId,
+    });
+  };
+
+  const handleMoreDetailToggle = () => {
+    const nextExpanded = !expanded;
+    setExpanded(nextExpanded);
+    trackEvent("more_detail_click", {
+      seller_id: sellerId,
+      video_id: videoId,
+      expanded: nextExpanded,
+    });
+  };
+
   const muteButton = (
     <button
-      onClick={(event) => {
-        event.stopPropagation();
-        onToggleMuted();
-      }}
+      onClick={handleMuteToggle}
       className="w-7 h-7 bg-secondary/80 rounded-full flex items-center justify-center flex-shrink-0"
       aria-label={isMuted ? "Unmute videos" : "Mute videos"}
       title={isMuted ? "Unmute" : "Mute"}
@@ -190,7 +217,7 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
 
       <div className="bg-card/95 backdrop-blur-sm border-t border-border/50">
         <button
-          onClick={() => setExpanded((value) => !value)}
+          onClick={handleMoreDetailToggle}
           className="w-full flex items-center justify-center pt-1 pb-0.5"
         >
           <svg
@@ -217,7 +244,10 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
 
             {!expanded && (
               <div className="flex items-center gap-2">
-                <button className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <button
+                  onClick={handleContactSupplierClick}
+                  className="h-7 px-2.5 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                >
                   Contact Supplier
                 </button>
                 {muteButton}
@@ -236,6 +266,13 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
                     {relatedProducts.map((product, index) => (
                       <article
                         key={product.id || `${video.id}-${index}`}
+                        onClick={() =>
+                          trackEvent("related_product_click", {
+                            seller_id: sellerId,
+                            video_id: videoId,
+                            product_id: String(product.id || `${video.id}-${index}`),
+                          })
+                        }
                         className="w-28 bg-secondary/30 border border-border/60 rounded-md overflow-hidden flex-shrink-0"
                       >
                         <img
@@ -258,7 +295,10 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
 
               <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between">
                 {muteButton}
-                <button className="h-7 px-3 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <button
+                  onClick={handleContactSupplierClick}
+                  className="h-7 px-3 bg-gradient-to-r from-teal-600 to-emerald-700 text-white text-[10px] font-semibold rounded-md whitespace-nowrap active:scale-[0.99] transition-transform shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                >
                   Contact Supplier
                 </button>
               </div>

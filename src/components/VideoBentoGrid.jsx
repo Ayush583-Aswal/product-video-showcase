@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useResolvedVideos from "../hooks/useResolvedVideos";
 import { cn } from "../lib/utils";
+import { trackEvent } from "../lib/analytics";
 
 const VideoBentoGrid = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const videos = useResolvedVideos();
   const [hoveredVideoId, setHoveredVideoId] = useState(null);
   const [selectedVideoId, setSelectedVideoId] = useState(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const sellerId = new URLSearchParams(location.search).get("seller") || "codex-test-seller";
 
   useEffect(() => {
     const media = window.matchMedia("(hover: none), (pointer: coarse)");
@@ -32,7 +35,12 @@ const VideoBentoGrid = () => {
                     setSelectedVideoId(video.id);
                     return;
                   }
-                  navigate(`/feed/${video.id}`);
+                  trackEvent("landing_video_click", {
+                    seller_id: sellerId,
+                    video_id: String(video.id),
+                    page: "landing",
+                  });
+                  navigate(`/feed/${video.id}${location.search || ""}`);
                 }}
                 onMouseEnter={() => setHoveredVideoId(video.id)}
                 onMouseLeave={() => setHoveredVideoId(null)}
