@@ -17,20 +17,21 @@ const getYoutubeEmbedUrl = (url, isMuted) => {
     const parsed = new URL(url);
     const host = parsed.hostname.replace("www.", "");
     const mute = isMuted ? 1 : 0;
+    const query = `autoplay=1&mute=${mute}&playsinline=1&controls=1&rel=0&modestbranding=1&fs=0&iv_load_policy=3&cc_load_policy=0`;
 
     if (host === "youtu.be") {
       const id = parsed.pathname.replace("/", "");
-      return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=${mute}&playsinline=1&rel=0` : null;
+      return id ? `https://www.youtube-nocookie.com/embed/${id}?${query}` : null;
     }
 
     if (host === "youtube.com" || host === "m.youtube.com") {
       if (parsed.pathname === "/watch") {
         const id = parsed.searchParams.get("v");
-        return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=${mute}&playsinline=1&rel=0` : null;
+        return id ? `https://www.youtube-nocookie.com/embed/${id}?${query}` : null;
       }
       if (parsed.pathname.startsWith("/shorts/")) {
         const id = parsed.pathname.split("/shorts/")[1];
-        return id ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=${mute}&playsinline=1&rel=0` : null;
+        return id ? `https://www.youtube-nocookie.com/embed/${id}?${query}` : null;
       }
     }
   } catch {
@@ -116,20 +117,9 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
     if (isFirst && !isActive) setShowHint(false);
   }, [isFirst, isActive]);
 
-  const togglePlay = () => {
-    if (!isNativeVideo || !videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setPaused(false);
-    } else {
-      videoRef.current.pause();
-      setPaused(true);
-    }
-  };
-
   return (
     <div className="w-full h-screen snap-start snap-always flex-shrink-0 bg-background flex flex-col">
-      <div className="relative flex-1 min-h-0 bg-black" onClick={togglePlay}>
+      <div className="relative flex-1 min-h-0 bg-black">
         {isNativeVideo ? (
           <video
             ref={videoRef}
@@ -139,6 +129,9 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
             muted={isMuted}
             playsInline
             preload="metadata"
+            controls
+            controlsList="nofullscreen nodownload noplaybackrate"
+            disablePictureInPicture
           />
         ) : (
           <iframe
@@ -146,9 +139,8 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted }) => {
             className="absolute inset-0 w-full h-full border-0"
             src={isActive && embedUrl ? embedUrl : "about:blank"}
             title={video.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="autoplay; encrypted-media"
             referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
             loading="lazy"
             style={{ pointerEvents: isActive ? "auto" : "none" }}
           />
