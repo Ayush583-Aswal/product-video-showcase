@@ -35,18 +35,24 @@ export const initGA = () => {
 };
 
 export const trackPageView = (path) => {
-  if (!isReady()) return;
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  window.gtag("config", measurementId, {
+  const payload = {
     page_path: path,
     session_id: getSessionId(),
-  });
+  };
+  console.log("[analytics] page_view", payload);
+
+  if (!isReady()) return;
+  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  window.gtag("config", measurementId, payload);
 };
 
 export const trackEvent = (eventName, params = {}) => {
-  if (!isReady()) return;
-  window.gtag("event", eventName, {
+  const payload = {
     ...params,
     session_id: getSessionId(),
-  });
+  };
+  console.log("[analytics] event", eventName, payload);
+
+  if (!isReady()) return;
+  window.gtag("event", eventName, payload);
 };

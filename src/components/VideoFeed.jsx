@@ -6,7 +6,9 @@ import { trackEvent } from "../lib/analytics";
 const VideoFeed = ({ initialVideoId, sellerId }) => {
   const containerRef = useRef(null);
   const didSetInitialPositionRef = useRef(false);
+  const intendedInitialIndexRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isTrackingReady, setIsTrackingReady] = useState(false);
   const resolvedVideos = useResolvedVideos();
   const [isMuted, setIsMuted] = useState(true);
   const activeVideoIdRef = useRef(null);
@@ -47,9 +49,19 @@ const VideoFeed = ({ initialVideoId, sellerId }) => {
 
     const height = containerRef.current.clientHeight || window.innerHeight;
     containerRef.current.scrollTop = initialIndex * height;
+    intendedInitialIndexRef.current = initialIndex;
     setActiveIndex(initialIndex);
     didSetInitialPositionRef.current = true;
+    setIsTrackingReady(initialIndex === 0);
   }, [initialVideoId, resolvedVideos]);
+
+  useEffect(() => {
+    if (!didSetInitialPositionRef.current) return;
+    if (intendedInitialIndexRef.current === null) return;
+    if (activeIndex === intendedInitialIndexRef.current) {
+      setIsTrackingReady(true);
+    }
+  }, [activeIndex]);
 
   const flushActiveVideo = useCallback(
     (exitReason, now = Date.now()) => {
@@ -71,6 +83,8 @@ const VideoFeed = ({ initialVideoId, sellerId }) => {
   );
 
   useEffect(() => {
+    if (!isTrackingReady) return;
+
     const current = resolvedVideos[activeIndex];
     if (!current) return;
 
@@ -98,7 +112,7 @@ const VideoFeed = ({ initialVideoId, sellerId }) => {
       seller_id: sellerId,
       video_id: nextVideoId,
     });
-  }, [activeIndex, resolvedVideos, sellerId, flushActiveVideo]);
+  }, [activeIndex, resolvedVideos, sellerId, flushActiveVideo, isTrackingReady]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {

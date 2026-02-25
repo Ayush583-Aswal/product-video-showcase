@@ -1,6 +1,31 @@
 import { useRef, useState, useEffect } from "react";
 import { trackEvent } from "../lib/analytics";
 
+let youtubeApiPromise;
+
+const loadYouTubeIframeApi = () => {
+  if (typeof window === "undefined") return Promise.reject(new Error("window unavailable"));
+  if (window.YT?.Player) return Promise.resolve(window.YT);
+  if (youtubeApiPromise) return youtubeApiPromise;
+
+  youtubeApiPromise = new Promise((resolve) => {
+    const existingScript = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(script);
+    }
+
+    const previous = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof previous === "function") previous();
+      resolve(window.YT);
+    };
+  });
+
+  return youtubeApiPromise;
+};
+
 const normalizeProvider = (source, url) => {
   if (source === "youtube" || source === "instagram" || source === "facebook") {
     return source;
@@ -18,7 +43,20 @@ const getYoutubeEmbedUrl = (url, isMuted) => {
     const parsed = new URL(url);
     const host = parsed.hostname.replace("www.", "");
     const mute = isMuted ? 1 : 0;
-    const query = `autoplay=1&mute=${mute}&playsinline=1&controls=1&rel=0&modestbranding=1&fs=0&iv_load_policy=3&cc_load_policy=0`;
+    const params = new URLSearchParams({
+      autoplay: "1",
+      mute: String(mute),
+      playsinline: "1",
+      controls: "1",
+      rel: "0",
+      modestbranding: "1",
+      fs: "0",
+      iv_load_policy: "3",
+      cc_load_policy: "0",
+      enablejsapi: "1",
+      origin: typeof window !== "undefined" ? window.location.origin : "",
+    });
+    const query = params.toString();
 
     if (host === "youtu.be") {
       const id = parsed.pathname.replace("/", "");
@@ -81,6 +119,11 @@ const getEmbedUrl = (provider, url, isMuted) => {
 
 const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted, sellerId }) => {
   const videoRef = useRef(null);
+  const iframeRef = useRef(null);
+  const ytPlayerRef = useRef(null);
+  const ytPlaybackStartRef = useRef(null);
+  const playbackStartRef = useRef(null);
+  const inferredStartRef = useRef(null);
   const [paused, setPaused] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showHint, setShowHint] = useState(isFirst);
@@ -91,6 +134,51 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted, sellerId 
   const postedAgo = video.postedAgo || "recently";
   const relatedProducts = Array.isArray(video.relatedProducts) ? video.relatedProducts : [];
   const videoId = String(video.id);
+  const providerForTracking = provider || "unknown";
+  const supportsInferredIframeTracking = !isNativeVideo && (provider === "instagram" || provider === "facebook");
+  const isYouTubeEmbed = provider === "youtube" && !isNativeVideo;
+
+  const flushNativePlaybackSegment = (reason) => {
+    if (!playbackStartRef.current) return;
+    const watchedMs = Math.max(0, Date.now() - playbackStartRef.current);
+    playbackStartRef.current = null;
+
+    trackEvent("video_pause", {
+      seller_id: sellerId,
+      video_id: videoId,
+      provider: providerForTracking,
+      reason,
+      watched_ms: watchedMs,
+    });
+  };
+
+  const flushInferredIframeSegment = (reason) => {
+    if (!inferredStartRef.current) return;
+    const watchedMs = Math.max(0, Date.now() - inferredStartRef.current);
+    inferredStartRef.current = null;
+
+    trackEvent("video_pause_inferred", {
+      seller_id: sellerId,
+      video_id: videoId,
+      provider: providerForTracking,
+      reason,
+      watched_ms: watchedMs,
+    });
+  };
+
+  const flushYouTubePlaybackSegment = (reason) => {
+    if (!ytPlaybackStartRef.current) return;
+    const watchedMs = Math.max(0, Date.now() - ytPlaybackStartRef.current);
+    ytPlaybackStartRef.current = null;
+
+    trackEvent("video_pause", {
+      seller_id: sellerId,
+      video_id: videoId,
+      provider: "youtube",
+      reason,
+      watched_ms: watchedMs,
+    });
+  };
 
   const handleMuteToggle = (event) => {
     event.stopPropagation();
@@ -153,6 +241,112 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted, sellerId 
 
   useEffect(() => {
     if (!isNativeVideo || !videoRef.current) return;
+
+    const element = videoRef.current;
+
+    const handlePlay = () => {
+      playbackStartRef.current = Date.now();
+      setPaused(false);
+      trackEvent("video_play", {
+        seller_id: sellerId,
+        video_id: videoId,
+        provider: providerForTracking,
+      });
+    };
+
+    const handlePause = () => {
+      setPaused(true);
+      flushNativePlaybackSegment("pause");
+    };
+
+    const handleEnded = () => {
+      flushNativePlaybackSegment("ended");
+    };
+
+    element.addEventListener("play", handlePlay);
+    element.addEventListener("pause", handlePause);
+    element.addEventListener("ended", handleEnded);
+
+    return () => {
+      element.removeEventListener("play", handlePlay);
+      element.removeEventListener("pause", handlePause);
+      element.removeEventListener("ended", handleEnded);
+    };
+  }, [isNativeVideo, sellerId, videoId, providerForTracking]);
+
+  useEffect(() => {
+    if (!supportsInferredIframeTracking) return;
+
+    if (isActive && !inferredStartRef.current) {
+      inferredStartRef.current = Date.now();
+      trackEvent("video_play_inferred", {
+        seller_id: sellerId,
+        video_id: videoId,
+        provider: providerForTracking,
+      });
+      return;
+    }
+
+    if (!isActive) {
+      flushInferredIframeSegment("inactive");
+    }
+  }, [isActive, supportsInferredIframeTracking, sellerId, videoId, providerForTracking]);
+
+  useEffect(() => {
+    if (!isYouTubeEmbed || !iframeRef.current || !isActive) return;
+
+    let cancelled = false;
+
+    const setupYouTubePlayer = async () => {
+      try {
+        const YT = await loadYouTubeIframeApi();
+        if (cancelled || !iframeRef.current) return;
+
+        ytPlayerRef.current = new YT.Player(iframeRef.current, {
+          events: {
+            onStateChange: (event) => {
+              if (event.data === YT.PlayerState.PLAYING) {
+                ytPlaybackStartRef.current = Date.now();
+                trackEvent("video_play", {
+                  seller_id: sellerId,
+                  video_id: videoId,
+                  provider: "youtube",
+                });
+              } else if (event.data === YT.PlayerState.PAUSED) {
+                flushYouTubePlaybackSegment("pause");
+              } else if (event.data === YT.PlayerState.ENDED) {
+                flushYouTubePlaybackSegment("ended");
+              }
+            },
+          },
+        });
+      } catch {
+        // Best-effort only; keep player rendering even if API setup fails.
+      }
+    };
+
+    setupYouTubePlayer();
+
+    return () => {
+      cancelled = true;
+      flushYouTubePlaybackSegment("unmount");
+      if (ytPlayerRef.current?.destroy) {
+        ytPlayerRef.current.destroy();
+      }
+      ytPlayerRef.current = null;
+    };
+  }, [isYouTubeEmbed, isActive, sellerId, videoId]);
+
+  useEffect(() => {
+    return () => {
+      flushNativePlaybackSegment("unmount");
+      flushInferredIframeSegment("unmount");
+      flushYouTubePlaybackSegment("unmount");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isNativeVideo || !videoRef.current) return;
     videoRef.current.muted = isMuted;
   }, [isMuted, isNativeVideo]);
 
@@ -184,6 +378,7 @@ const VideoCard = ({ video, isActive, isFirst, isMuted, onToggleMuted, sellerId 
           />
         ) : (
           <iframe
+            ref={iframeRef}
             key={`${video.id}-${isActive}-${isMuted}`}
             className="absolute inset-0 w-full h-full border-0"
             src={isActive && embedUrl ? embedUrl : "about:blank"}
