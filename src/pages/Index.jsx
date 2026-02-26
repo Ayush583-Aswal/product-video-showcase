@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import VideoBentoGrid from "../components/VideoBentoGrid";
+import "../styles/pages.css";
 
 const DEFAULT_TEST_SELLER_ID = "codex-test-seller";
 
@@ -15,7 +16,7 @@ const Index = () => {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="w-full h-screen bg-background overflow-hidden">
+    <div className="page-shell">
       <VideoBentoGrid />
     </div>
   );

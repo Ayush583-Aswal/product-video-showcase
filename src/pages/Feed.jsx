@@ -1,5 +1,6 @@
 import { useSearchParams, useParams } from "react-router-dom";
 import VideoFeed from "../components/VideoFeed";
+import "../styles/pages.css";
 
 const DEFAULT_TEST_SELLER_ID = "codex-test-seller";
 
@@ -9,7 +10,7 @@ const Feed = () => {
   const sellerId = searchParams.get("seller") || DEFAULT_TEST_SELLER_ID;
 
   return (
-    <div className="w-full h-dvh bg-background overflow-hidden">
+    <div className="page-shell">
       <VideoFeed initialVideoId={videoId} sellerId={sellerId} />
     </div>
   );

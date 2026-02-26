@@ -1,0 +1,6 @@
+.page-shell {
+  width: 100%;
+  height: 100dvh;
+  background: hsl(var(--background));
+  overflow: hidden;
+}

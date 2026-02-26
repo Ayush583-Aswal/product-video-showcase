@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import VideoCard from "./VideoCard";
 import useResolvedVideos from "../hooks/useResolvedVideos";
 import { trackEvent } from "../lib/analytics";
+import "../styles/video-feed.css";
 
 const VideoFeed = ({ initialVideoId, sellerId }) => {
   const containerRef = useRef(null);
@@ -163,7 +164,7 @@ const VideoFeed = ({ initialVideoId, sellerId }) => {
   return (
     <div
       ref={containerRef}
-      className="h-dvh w-full overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
+      className="video-feed-container hide-scrollbar"
     >
       {resolvedVideos.map((video, index) => (
         <VideoCard
